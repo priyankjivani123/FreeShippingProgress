@@ -1,6 +1,8 @@
 # Priyank_FreeShippingProgress Module
 
 ## Overview
+▶️ **Watch the video demo:**  
+https://www.awesomescreenshot.com/video/46870419?key=d4d665693e3d66dcbdb8100954b3441c
 
 The **Free Shipping Progress** module provides a dynamic progress bar for Magento 2 checkout and cart pages, showing customers how much more they need to spend to unlock free shipping.  
 
