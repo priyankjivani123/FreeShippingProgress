@@ -9,8 +9,6 @@
             <label>Free Shipping Bar Settings</label>
 
             <tab>priyank</tab>
-			<resource>Webkul_Demo::config_demo</resource>
-
             <group id="configuration" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General Settings</label>
 
