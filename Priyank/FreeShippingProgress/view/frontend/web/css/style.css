@@ -1,0 +1,100 @@
+/* --- Sticky Bottom Container --- */
+.fs-progress-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 900px;
+    background: linear-gradient(90deg, #8A3FFC, #FFBA4A);
+    padding: 14px 22px 28px;
+    border-radius: 20px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.22);
+    z-index: 9999;
+}
+
+/* Text */
+.fs-progress-text {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+/* Track */
+.fs-track {
+    position: relative;
+    height: 16px;
+    background: rgba(255,255,255,0.35);
+    border-radius: 12px;
+    overflow: visible !important; /* IMPORTANT FIX */
+}
+
+/* Fill */
+.fs-fill {
+    height: 100%;
+    background: #33cc5a;
+    border-radius: 12px;
+    position: relative;
+    transition: width 0.35s ease-in-out;
+}
+
+/* Truck icon container */
+.fs-icon-container {
+    position: absolute;
+    top: -6px;
+    transform: translateX(-50%);
+    transition: left 0.25s ease-in-out;
+    pointer-events: none;
+    animation: truckBounce 1.3s infinite ease-in-out; /* up-down animation */
+}
+
+/* Truck icon */
+.fs-truck-icon {
+    width: 32px;
+    height: auto;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+}
+
+/* Up-down animation */
+@keyframes truckBounce {
+    0%   { transform: translate(-50%, 0); }
+    50%  { transform: translate(-50%, -6px); }
+    100% { transform: translate(-50%, 0); }
+}
+
+/* Shimmer */
+.fs-shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.7),
+        transparent
+    );
+    animation: shimmerMove 1.6s infinite linear;
+}
+
+@keyframes shimmerMove {
+    0% { left: -40px; }
+    100% { left: 100%; }
+}
+
+/* When unlocked */
+.fs-progress-container.unlocked {
+    background: linear-gradient(90deg, #3DD46C, #4CD964);
+}
+
+.fs-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 9999; /* make sure it's above everything */
+}

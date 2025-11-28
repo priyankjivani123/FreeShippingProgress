@@ -1,0 +1,23 @@
+<?php /** @var \Priyank\FreeShippingProgress\ViewModel\Config $config */ ?>
+<?php $config = $block->getData('config')->getConfigArray(); ?>
+
+<?php if (!empty($config['enabled']) && $config['enabled'] == 1): ?>
+    <div id="free-shipping-progress" data-bind="scope:'freeShippingProgress'">
+        <!-- ko template: getTemplate() --><!-- /ko -->
+    </div>
+
+    <script type="text/x-magento-init">
+    {
+        "#free-shipping-progress": {
+            "Magento_Ui/js/core/app": {
+                "components": {
+                    "freeShippingProgress": {
+                        "component": "Priyank_FreeShippingProgress/js/progress",
+                        "freeShippingLimit": <?= !empty($config['min_amount']) ? (int)$config['min_amount'] : 0 ?>
+                    }
+                }
+            }
+        }
+    }
+    </script>
+<?php endif; ?>

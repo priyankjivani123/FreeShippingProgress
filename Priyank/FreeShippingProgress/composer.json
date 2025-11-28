@@ -1,0 +1,22 @@
+{
+    "name": "priyank/freeshippingprogress",
+    "description": "Magento 2 module to show free shipping progress bar",
+    "require": {
+        "php": "~8.1.0||~8.2.0",
+        "magento/framework": "*"
+    },
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": [
+        "OSL-3.0",
+        "AFL-3.0"
+    ],
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Priyank\\FreeShippingProgress\\": ""
+        }
+    }
+}

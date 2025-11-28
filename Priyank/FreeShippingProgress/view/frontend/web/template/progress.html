@@ -1,0 +1,50 @@
+<div class="fs-progress-container" 
+     data-bind="visible: isVisible(), css: { 'unlocked': remainingAmount() == 0 }">
+
+    <!-- CLOSE ICON -->
+    <span class="fs-close" data-bind="click: showHidden, visible: isVisible">&times;</span>
+
+    <div class="fs-progress-bar-wrapper" data-bind="visible: isVisible()">
+
+        <!-- DYNAMIC TEXT STATES -->
+        <div class="fs-progress-text">
+
+            <!-- BEFORE 80% -->
+            <!-- ko if: percent() < 80 && remainingAmount() > 0 -->
+                Keep going! Add 
+                <strong data-bind="text: '$' + remainingAmount().toFixed(2)"></strong>
+                more to unlock FREE SHIPPING!
+            <!-- /ko -->
+
+            <!-- BETWEEN 80% AND 99% -->
+            <!-- ko if: percent() >= 80 && remainingAmount() > 0 -->
+                Almost there! You're 
+                <strong data-bind="text: '$' + remainingAmount().toFixed(2)"></strong>
+                away from FREE SHIPPING!
+                (<span data-bind="text: percent().toFixed(0)"></span>% Complete)
+            <!-- /ko -->
+
+            <!-- UNLOCKED (100%) -->
+            <!-- ko if: remainingAmount() == 0 -->
+                🎉 You unlocked FREE SHIPPING!
+            <!-- /ko -->
+        </div>
+
+        <!-- PROGRESS BAR TRACK -->
+        <div class="fs-track">
+
+            <div class="fs-fill" data-bind="style: { width: percent() + '%' }">
+                <div class="fs-shimmer"></div>
+            </div>
+
+            <!-- MOVING TRUCK ICON -->
+            <div class="fs-icon-container" data-bind="style: { left: percent() + '%' }">
+                <img data-bind="attr: { src: require.toUrl('Priyank_FreeShippingProgress/images/delivery-truck.svg') }"
+                     alt="Free Shipping" class="fs-truck-icon" />
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
