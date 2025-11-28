@@ -1,0 +1,178 @@
+<?php
+/** @var \Priyank\FreeShippingProgressHyva\ViewModel\Config $configViewModel */
+$configViewModel = $block->getData('config');
+$config = $configViewModel->getConfigArray();
+?>
+<?php if (!empty($config['enabled']) && $config['enabled'] == 1): ?>
+<div 
+    x-data="freeShippingProgress()"
+    x-init="init()"
+    x-show="showBar && !isClosed"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 -translate-y-full"
+    x-transition:enter-end="opacity-100 translate-y-0"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 translate-y-0"
+    x-transition:leave-end="opacity-0 -translate-y-full"
+    style="display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: linear-gradient(to right, #7c3aed, #ec4899, #fb923c); padding: 12px 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"
+>
+    <div class="max-w-screen-xl mx-auto relative" style="padding-right: 40px;">
+        <!-- Close button -->
+        <button 
+            @click="closeBar()"
+            style="position: absolute; top: 50%; right: 0; transform: translateY(-50%); background: transparent; border: none; color: white; cursor: pointer; padding: 4px;"
+            aria-label="Close"
+        >
+            <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
+        <!-- Message with icon -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: white;">
+            <svg style="width: 24px; height: 24px; flex-shrink: 0;" :class="{ 'animate-bounce': percentage >= 100 }" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18 18.5a1.5 1.5 0 01-1 1.5 1.5 1.5 0 11-1-1.5m1.5-9l1.96 2.5H18V9.5m-11 9A1.5 1.5 0 017.5 20 1.5 1.5 0 016 18.5 1.5 1.5 0 017.5 17c.5 0 .93.28 1.15.68l.59-.68h2.26c.22-.4.65-.68 1.15-.68a1.5 1.5 0 011.5 1.5A1.5 1.5 0 0112.5 20a1.5 1.5 0 01-1.15-.68H9.09c-.22.4-.65.68-1.15.68M17 12V3H3c-1.11 0-2 .89-2 2v11h2a3 3 0 003 3 3 3 0 003-3h6a3 3 0 003 3 3 3 0 003-3h2v-4h-3l-3-4h-3z"/>
+            </svg>
+            <span style="font-weight: 500; font-size: 14px;" x-text="summaryText"></span>
+            <span style="font-size: 12px; opacity: 0.9;" x-text="'(' + percentage + '% Complete)'"></span>
+        </div>
+        
+        <!-- Progress bar -->
+        <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.3); border-radius: 9999px; overflow: hidden;">
+            <div 
+                style="height: 6px; background: white; border-radius: 9999px; transition: width 0.7s ease-out;"
+                :style="'width: ' + percentage + '%'"
+            ></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function freeShippingProgress() {
+    return {
+        limit: <?= (float)$config['min_amount'] ?>,
+        subtotal: 0,
+        percentage: 0,
+        summaryText: '',
+        showBar: false,
+        isClosed: false,
+        
+        init() {
+            this.isClosed = sessionStorage.getItem('freeShippingBarClosed') === 'true';
+            this.getCartSubtotal();
+            
+            window.addEventListener('reload-customer-section-data', () => {
+                setTimeout(() => this.getCartSubtotal(), 100);
+            });
+            
+            window.addEventListener('private-content-loaded', () => {
+                setTimeout(() => this.getCartSubtotal(), 100);
+            });
+            
+            window.addEventListener('cart-updated', () => {
+                setTimeout(() => this.getCartSubtotal(), 100);
+            });
+            
+            this.pollForCart();
+        },
+        
+        closeBar() {
+            this.isClosed = true;
+            sessionStorage.setItem('freeShippingBarClosed', 'true');
+        },
+        
+        pollForCart() {
+            let attempts = 0;
+            const maxAttempts = 20;
+            const interval = setInterval(() => {
+                attempts++;
+                if (window.hyva && window.hyva.getCart) {
+                    this.getCartSubtotal();
+                    clearInterval(interval);
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    this.fetchCartFromAPI();
+                }
+            }, 200);
+        },
+        
+        async getCartSubtotal() {
+            try {
+                if (window.hyva && typeof window.hyva.getCart === 'function') {
+                    const cart = await window.hyva.getCart();
+                    
+                    if (cart) {
+                        this.subtotal = parseFloat(
+                            cart.subtotalAmount || 
+                            cart.subtotal || 
+                            cart.subtotal_incl_tax || 
+                            cart.subtotal_excl_tax ||
+                            0
+                        );
+                        
+                        if (this.subtotal > 0) {
+                            this.update();
+                            return;
+                        }
+                    }
+                }
+                
+                await this.fetchCartFromAPI();
+                
+            } catch (error) {
+                await this.fetchCartFromAPI();
+            }
+        },
+        
+        async fetchCartFromAPI() {
+            try {
+                const response = await fetch('http://127.0.0.1/php83/magento248-p3/pub/customer/section/load/?sections=cart&update_section_id=false', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.cart) {
+                        this.subtotal = parseFloat(
+                            data.cart.subtotalAmount || 
+                            data.cart.subtotal || 
+                            data.cart.subtotal_incl_tax ||
+                            data.cart.subtotal_excl_tax ||
+                            0
+                        );
+                        
+                        this.update();
+                    }
+                }
+            } catch (error) {
+                // Silent fail
+            }
+        },
+        
+        update() {
+            const remaining = this.limit - this.subtotal;
+            this.percentage = Math.min(100, Math.round((this.subtotal / this.limit) * 100));
+            
+            if (remaining > 0) {
+                this.summaryText = `Almost there! You're ₹${remaining.toFixed(2)} away from FREE SHIPPING!`;
+            } else {
+                this.summaryText = '🎉 Congratulations! You got FREE SHIPPING!';
+            }
+            
+            this.showBar = this.subtotal > 0;
+            
+            if (this.showBar) {
+                this.isClosed = false;
+                sessionStorage.removeItem('freeShippingBarClosed');
+            }
+        }
+    }
+}
+</script>
+<?php endif; ?>
